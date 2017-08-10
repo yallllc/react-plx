@@ -46,7 +46,28 @@ h2, h3, h4 {
 .FixedDemo {
   position: relative;
   padding: 0 20px;
-  width: 140px; }
+  width: 140px;
+  transition: background 1s; }
+  .FixedDemo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 200px; }
+  .FixedDemo.Plx--above::after {
+    content: 'above'; }
+  .FixedDemo.Plx--in-0::after {
+    content: 'in 0'; }
+  .FixedDemo.Plx--between-0-and-1::after {
+    content: 'between 0 and 1'; }
+  .FixedDemo.Plx--in-1::after {
+    content: 'in 1'; }
+  .FixedDemo.Plx--between-1-and-2::after {
+    content: 'between 1 and 2'; }
+  .FixedDemo.Plx--in-2::after {
+    content: 'in 2'; }
+  .FixedDemo.Plx--bellow::after {
+    content: 'bellow'; }
 
 .FixedDemo img {
   width: 100px;
