@@ -56,16 +56,16 @@ h2, h3, h4 {
     width: 200px; }
   .FixedDemo.Plx--above::after {
     content: 'above'; }
-  .FixedDemo.Plx--in-0::after {
-    content: 'in 0'; }
-  .FixedDemo.Plx--between-0-and-1::after {
-    content: 'between 0 and 1'; }
-  .FixedDemo.Plx--in-1::after {
-    content: 'in 1'; }
-  .FixedDemo.Plx--between-1-and-2::after {
-    content: 'between 1 and 2'; }
-  .FixedDemo.Plx--in-2::after {
-    content: 'in 2'; }
+  .FixedDemo.Plx--in-first::after {
+    content: 'in first'; }
+  .FixedDemo.Plx--between-first-and-second::after {
+    content: 'between first and second'; }
+  .FixedDemo.Plx--in-second::after {
+    content: 'in second'; }
+  .FixedDemo.Plx--between-second-and-third::after {
+    content: 'between second and third'; }
+  .FixedDemo.Plx--in-third::after {
+    content: 'in third'; }
   .FixedDemo.Plx--bellow::after {
     content: 'bellow'; }
 
