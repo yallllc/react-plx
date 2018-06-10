@@ -92,7 +92,7 @@ h4 {
 
 .Explosion {
   height: 24rem;
-  margin: 0 auto;
+  margin: 0 auto 10rem;
   position: relative;
   width: 24rem; }
 
@@ -139,7 +139,7 @@ h4 {
 .Phone-contentSection {
   background: #e34e47;
   color: #fff;
-  font-size: 6rem;
+  font-size: 3rem;
   font-weight: 300;
   height: 100%;
   padding-top: 75%;
@@ -149,6 +149,9 @@ h4 {
     background: #409ad7; }
   .Phone-contentSection:nth-child(3) {
     background: #34ba9c; }
+  @media (min-width: 600px) {
+    .Phone-contentSection {
+      font-size: 5rem; } }
 
 .Links {
   border-radius: 50%;
