@@ -175,8 +175,8 @@ h4 {
   transition: opacity 250ms;
   width: 100%;
   z-index: 0; }
-  .Links-plx.Plx--bellow,
-  .Links-plx.Plx--bellow + .Links-content {
+  .Links-plx.Plx--below,
+  .Links-plx.Plx--below + .Links-content {
     opacity: 0; }
 
 .Links-circle {
