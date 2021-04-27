@@ -179,6 +179,9 @@ const PROPS_TO_OMIT = [
   "tagName",
   "onPlxStart",
   "onPlxEnd",
+  "scrollEventName",
+  "scrollPositionY",
+  "scrollManager",
 ];
 
 // Get element's top offset
@@ -817,10 +820,16 @@ export default class Plx extends Component {
 
   componentDidMount() {
     // Get scroll manager singleton
-    this.scrollManager = new ScrollManager();
+    if (typeof this.props.scrollManager === "undefined")
+      this.scrollManager = new ScrollManager();
+    if (typeof this.props.scrollManager === "function")
+      this.scrollManager = new this.props.scrollManager();
 
     // Add listeners
-    window.addEventListener("window-scroll", this.handleScrollChange);
+    window.addEventListener(
+      this.props.scrollEventName,
+      this.handleScrollChange
+    );
     window.addEventListener("resize", this.handleResize);
 
     this.update();
@@ -849,7 +858,10 @@ export default class Plx extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener("window-scroll", this.handleScrollChange);
+    window.removeEventListener(
+      this.props.scrollEventName,
+      this.handleScrollChange
+    );
     window.removeEventListener("resize", this.handleResize);
 
     clearTimeout(this.resizeDebounceTimeoutID);
@@ -861,10 +873,23 @@ export default class Plx extends Component {
   }
 
   update(scrollPosition = null) {
-    const currentScrollPosition =
-      scrollPosition === null
-        ? this.scrollManager.getScrollPosition().scrollPositionY
-        : scrollPosition;
+    let currentScrollPosition = scrollPosition;
+
+    if (
+      currentScrollPosition === null &&
+      typeof this.props.scrollPositionY === "function"
+    ) {
+      currentScrollPosition = this.props.scrollPositionY();
+    }
+
+    if (currentScrollPosition === null && this.scrollManager) {
+      currentScrollPosition = this.scrollManager.getScrollPosition()
+        .scrollPositionY;
+    }
+
+    if (currentScrollPosition === null) {
+      currentScrollPosition = 0;
+    }
 
     const newState = getNewState(
       currentScrollPosition,
@@ -974,6 +999,9 @@ Plx.propTypes = {
   tagName: PropTypes.string,
   onPlxStart: PropTypes.func,
   onPlxEnd: PropTypes.func,
+  scrollEventName: PropTypes.string,
+  scrollPositionY: PropTypes.func,
+  scrollManager: PropTypes.func,
 };
 
 Plx.defaultProps = {
@@ -987,4 +1015,7 @@ Plx.defaultProps = {
   tagName: "div",
   onPlxStart: null,
   onPlxEnd: null,
+  scrollEventName: "window-scroll",
+  scrollPositionY: null,
+  scrollManager: undefined,
 };
