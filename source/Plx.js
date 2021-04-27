@@ -1,33 +1,33 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import BezierEasing from 'bezier-easing';
-import ScrollManager from 'window-scroll-manager';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import BezierEasing from "bezier-easing";
+import ScrollManager from "window-scroll-manager";
 
 // Check if code is running in the browser (important for universal rendering)
-const WINDOW_EXISTS = typeof window !== 'undefined';
+const WINDOW_EXISTS = typeof window !== "undefined";
 
 // Regex that checks for numbers in string
 // formatted as "{number}{unit}" where unit is "px", "vh", "%" or none
 const START_END_DURATION_REGEX = /^-?\d+(\.\d+)?(px|vh|%)?$/;
 
-const DEFAULT_UNIT = 'px';
-const DEFAULT_ANGLE_UNIT = 'deg';
+const DEFAULT_UNIT = "px";
+const DEFAULT_ANGLE_UNIT = "deg";
 const ANGLE_PROPERTIES = [
-  'rotate',
-  'rotateX',
-  'rotateY',
-  'rotateZ',
-  'skew',
-  'skewX',
-  'skewY',
-  'skewZ',
-  'hueRotate',
+  "rotate",
+  "rotateX",
+  "rotateY",
+  "rotateZ",
+  "skew",
+  "skewX",
+  "skewY",
+  "skewZ",
+  "hueRotate",
 ];
 
 const EASINGS = {
   ease: [0.25, 0.1, 0.25, 1.0],
-  easeIn: [0.42, 0.0, 1.00, 1.0],
-  easeOut: [0.00, 0.0, 0.58, 1.0],
+  easeIn: [0.42, 0.0, 1.0, 1.0],
+  easeOut: [0.0, 0.0, 0.58, 1.0],
   easeInOut: [0.42, 0.0, 0.58, 1.0],
   easeInSine: [0.47, 0, 0.745, 0.715],
   easeOutSine: [0.39, 0.575, 0.565, 1],
@@ -55,15 +55,24 @@ const EASINGS = {
 // Color regexes
 
 // 0 - 199 | 200 - 249 | 250 - 255
-const REGEX_0_255 = '(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])';
+const REGEX_0_255 = "(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
 // 0.0 - 1.9999...
-const REGEX_0_1 = '([01](\\.\\d+)?)';
+const REGEX_0_1 = "([01](\\.\\d+)?)";
 // 00 - FF
-const REGEX_TWO_HEX_DIGITS = '([a-f\\d]{2})';
+const REGEX_TWO_HEX_DIGITS = "([a-f\\d]{2})";
 
-const HEX_REGEX = new RegExp(`^#${ REGEX_TWO_HEX_DIGITS }${ REGEX_TWO_HEX_DIGITS }${ REGEX_TWO_HEX_DIGITS }$`, 'i');
-const RGB_REGEX = new RegExp(`^rgb\\(${ REGEX_0_255 },${ REGEX_0_255 },${ REGEX_0_255 }\\)$`, 'i');
-const RGBA_REGEX = new RegExp(`^rgba\\(${ REGEX_0_255 },${ REGEX_0_255 },${ REGEX_0_255 },${ REGEX_0_1 }\\)$`, 'i');
+const HEX_REGEX = new RegExp(
+  `^#${REGEX_TWO_HEX_DIGITS}${REGEX_TWO_HEX_DIGITS}${REGEX_TWO_HEX_DIGITS}$`,
+  "i"
+);
+const RGB_REGEX = new RegExp(
+  `^rgb\\(${REGEX_0_255},${REGEX_0_255},${REGEX_0_255}\\)$`,
+  "i"
+);
+const RGBA_REGEX = new RegExp(
+  `^rgba\\(${REGEX_0_255},${REGEX_0_255},${REGEX_0_255},${REGEX_0_1}\\)$`,
+  "i"
+);
 
 const SCROLL_OFFSET = 50;
 
@@ -71,53 +80,53 @@ const RESIZE_DEBOUNCE_TIMEOUT = 150;
 
 // CSS transform map
 const TRANSFORM_MAP = {
-  rotate: (value, unit = DEFAULT_ANGLE_UNIT) => `rotate(${ value }${ unit })`,
-  rotateX: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateX(${ value }${ unit })`,
-  rotateY: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateY(${ value }${ unit })`,
-  rotateZ: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateZ(${ value }${ unit })`,
-  scale: value => `scale(${ value })`,
-  scaleX: value => `scaleX(${ value })`,
-  scaleY: value => `scaleY(${ value })`,
-  scaleZ: value => `scaleZ(${ value })`,
-  skew: (value, unit = DEFAULT_UNIT) => `skew(${ value }${ unit })`,
-  skewX: (value, unit = DEFAULT_UNIT) => `skewX(${ value }${ unit })`,
-  skewY: (value, unit = DEFAULT_UNIT) => `skewY(${ value }${ unit })`,
-  skewZ: (value, unit = DEFAULT_UNIT) => `skewZ(${ value }${ unit })`,
-  translateX: (value, unit = DEFAULT_UNIT) => `translateX(${ value }${ unit })`,
-  translateY: (value, unit = DEFAULT_UNIT) => `translateY(${ value }${ unit })`,
-  translateZ: (value, unit = DEFAULT_UNIT) => `translateZ(${ value }${ unit })`,
+  rotate: (value, unit = DEFAULT_ANGLE_UNIT) => `rotate(${value}${unit})`,
+  rotateX: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateX(${value}${unit})`,
+  rotateY: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateY(${value}${unit})`,
+  rotateZ: (value, unit = DEFAULT_ANGLE_UNIT) => `rotateZ(${value}${unit})`,
+  scale: (value) => `scale(${value})`,
+  scaleX: (value) => `scaleX(${value})`,
+  scaleY: (value) => `scaleY(${value})`,
+  scaleZ: (value) => `scaleZ(${value})`,
+  skew: (value, unit = DEFAULT_UNIT) => `skew(${value}${unit})`,
+  skewX: (value, unit = DEFAULT_UNIT) => `skewX(${value}${unit})`,
+  skewY: (value, unit = DEFAULT_UNIT) => `skewY(${value}${unit})`,
+  skewZ: (value, unit = DEFAULT_UNIT) => `skewZ(${value}${unit})`,
+  translateX: (value, unit = DEFAULT_UNIT) => `translateX(${value}${unit})`,
+  translateY: (value, unit = DEFAULT_UNIT) => `translateY(${value}${unit})`,
+  translateZ: (value, unit = DEFAULT_UNIT) => `translateZ(${value}${unit})`,
 };
 
 // Order of CSS transforms matters
 const ORDER_OF_TRANSFORMS = [
-  'translateX',
-  'translateY',
-  'translateZ',
-  'skew',
-  'skewX',
-  'skewY',
-  'skewZ',
-  'rotate',
-  'rotateX',
-  'rotateY',
-  'rotateZ',
-  'scale',
-  'scaleX',
-  'scaleY',
-  'scaleZ',
+  "translateX",
+  "translateY",
+  "translateZ",
+  "skew",
+  "skewX",
+  "skewY",
+  "skewZ",
+  "rotate",
+  "rotateX",
+  "rotateY",
+  "rotateZ",
+  "scale",
+  "scaleX",
+  "scaleY",
+  "scaleZ",
 ];
 
 // CSS properties that use color values
 const COLOR_PROPERTIES = [
-  'backgroundColor',
-  'borderBottomColor',
-  'borderColor',
-  'borderLeftColor',
-  'borderRightColor',
-  'borderTopColor',
-  'color',
-  'fill',
-  'stroke',
+  "backgroundColor",
+  "borderBottomColor",
+  "borderColor",
+  "borderLeftColor",
+  "borderRightColor",
+  "borderTopColor",
+  "color",
+  "fill",
+  "stroke",
 ];
 
 // CSS filter map
@@ -135,40 +144,41 @@ const COLOR_PROPERTIES = [
 // drop-shadow()
 // url()
 const FILTER_MAP = {
-  blur: (value, unit = DEFAULT_UNIT) => `blur(${ value }${ unit })`,
-  brightness: value => `brightness(${ value })`,
-  contrast: value => `contrast(${ value })`,
-  grayscale: value => `grayscale(${ value })`,
-  hueRotate: (value, unit = DEFAULT_ANGLE_UNIT) => `hue-rotate(${ value }${ unit })`,
-  invert: value => `invert(${ value })`,
-  opacityFilter: value => `opacity(${ value })`,
-  saturate: value => `saturate(${ value })`,
-  sepia: value => `sepia(${ value })`,
+  blur: (value, unit = DEFAULT_UNIT) => `blur(${value}${unit})`,
+  brightness: (value) => `brightness(${value})`,
+  contrast: (value) => `contrast(${value})`,
+  grayscale: (value) => `grayscale(${value})`,
+  hueRotate: (value, unit = DEFAULT_ANGLE_UNIT) =>
+    `hue-rotate(${value}${unit})`,
+  invert: (value) => `invert(${value})`,
+  opacityFilter: (value) => `opacity(${value})`,
+  saturate: (value) => `saturate(${value})`,
+  sepia: (value) => `sepia(${value})`,
 };
 
 const FILTER_PROPERTIES = [
-  'blur',
-  'brightness',
-  'contrast',
-  'grayscale',
-  'hueRotate',
-  'invert',
-  'opacityFilter',
-  'saturate',
-  'sepia',
+  "blur",
+  "brightness",
+  "contrast",
+  "grayscale",
+  "hueRotate",
+  "invert",
+  "opacityFilter",
+  "saturate",
+  "sepia",
 ];
 
 // Props to be removed from passing directly to the component element
 const PROPS_TO_OMIT = [
-  'animateWhenNotInViewport',
-  'children',
-  'className',
-  'freeze',
-  'parallaxData',
-  'style',
-  'tagName',
-  'onPlxStart',
-  'onPlxEnd',
+  "animateWhenNotInViewport",
+  "children",
+  "className",
+  "freeze",
+  "parallaxData",
+  "style",
+  "tagName",
+  "onPlxStart",
+  "onPlxEnd",
 ];
 
 // Get element's top offset
@@ -203,11 +213,11 @@ function getValueInPx(value, maxScroll) {
   let valueInPx = value;
 
   switch (unit) {
-    case 'vh':
+    case "vh":
       valueInPx = vh * floatValue;
       break;
-    case '%':
-      valueInPx = maxScroll * floatValue / 100;
+    case "%":
+      valueInPx = (maxScroll * floatValue) / 100;
       break;
     default:
       valueInPx = floatValue;
@@ -226,40 +236,45 @@ function convertPropToPixels(propName, propValue, maxScroll, offset = 0) {
     NINE: 57,
   };
 
-  if (typeof propValue === 'number') {
+  if (typeof propValue === "number") {
     propValueInPx = propValue;
   } else if (START_END_DURATION_REGEX.test(propValue)) {
     propValueInPx = getValueInPx(propValue, maxScroll);
   } else if (
     isElement ||
-    typeof propValue === 'string' &&
-    (propValue.charCodeAt(0) < keyCodes.ZERO || propValue.charCodeAt(0) > keyCodes.NINE)
+    (typeof propValue === "string" &&
+      (propValue.charCodeAt(0) < keyCodes.ZERO ||
+        propValue.charCodeAt(0) > keyCodes.NINE))
   ) {
     const element = isElement ? propValue : document.querySelector(propValue);
 
     if (!element) {
-      console.warn(`Plx, ERROR: ${ propName } selector matches no elements: "${ propValue }"`); // eslint-disable-line
+      console.warn(
+        `Plx, ERROR: ${propName} selector matches no elements: "${propValue}"`
+      ); // eslint-disable-line
       return null;
     }
 
-    if (propName === 'start' || propName === 'end') {
+    if (propName === "start" || propName === "end") {
       // START or END
       // Element enters the viewport
       propValueInPx = getElementTop(element) - window.innerHeight;
-    } else if (propName === 'duration') {
+    } else if (propName === "duration") {
       // DURATION
       // Height of the element
       propValueInPx = element.offsetHeight;
     }
   } else {
-    console.warn(`Plx, ERROR: "${ propValue }" is not a valid ${ propName } value, check documenation`); // eslint-disable-line
+    console.warn(
+      `Plx, ERROR: "${propValue}" is not a valid ${propName} value, check documenation`
+    ); // eslint-disable-line
     return null;
   }
 
   // Transform offset to px
   let offsetInPx = 0;
 
-  if (typeof offset === 'number') {
+  if (typeof offset === "number") {
     offsetInPx = offset;
   } else if (START_END_DURATION_REGEX.test(offset)) {
     offsetInPx = getValueInPx(offset, maxScroll);
@@ -277,12 +292,15 @@ function convertPropToPixels(propName, propValue, maxScroll, offset = 0) {
 // Convers color in hex format into object { r, g, b, a }
 function hexToObject(hex) {
   // Convert #abc to #aabbcc
-  const color = hex.length === 4 ? `#${ hex[1] }${ hex[1] }${ hex[2] }${ hex[2] }${ hex[3] }${ hex[3] }` : hex;
+  const color =
+    hex.length === 4
+      ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+      : hex;
   const result = HEX_REGEX.exec(color);
 
   // Safety check, if color is in the wrong format
   if (!result) {
-    console.warn(`Plx, ERROR: hex color is not in the right format: "${ hex }"`); // eslint-disable-line no-console
+    console.warn(`Plx, ERROR: hex color is not in the right format: "${hex}"`); // eslint-disable-line no-console
     return null;
   }
 
@@ -297,13 +315,15 @@ function hexToObject(hex) {
 
 // Convers color in rgb format into object { r, g, b, a }
 function rgbToObject(rgb) {
-  const isRgba = rgb.toLowerCase().indexOf('rgba') === 0;
-  const color = rgb.replace(/ /g, '');
+  const isRgba = rgb.toLowerCase().indexOf("rgba") === 0;
+  const color = rgb.replace(/ /g, "");
   const result = isRgba ? RGBA_REGEX.exec(color) : RGB_REGEX.exec(color);
 
   // Safety check, if color is in the wrong format
   if (!result) {
-    console.warn(`Plx, ERROR: rgb or rgba color is not in the right format: "${ rgb }"`); // eslint-disable-line
+    console.warn(
+      `Plx, ERROR: rgb or rgba color is not in the right format: "${rgb}"`
+    ); // eslint-disable-line
     return null;
   }
 
@@ -317,27 +337,39 @@ function rgbToObject(rgb) {
 }
 
 // Calculates the current value for parallaxing property
-function parallax(scrollPosition, start, duration, startValue, endValue, easing) {
+function parallax(
+  scrollPosition,
+  start,
+  duration,
+  startValue,
+  endValue,
+  easing
+) {
   let min = startValue;
   let max = endValue;
   const invert = startValue > endValue;
 
-
   // Safety check, if "startValue" is in the wrong format
-  if (typeof startValue !== 'number') {
-    console.warn(`Plx, ERROR: startValue is not a number (type: "${ typeof endValue }", value: "${ endValue }")`); // eslint-disable-line
+  if (typeof startValue !== "number") {
+    console.warn(
+      `Plx, ERROR: startValue is not a number (type: "${typeof endValue}", value: "${endValue}")`
+    ); // eslint-disable-line
     return null;
   }
 
   // Safety check, if "endValue" is in the wrong format
-  if (typeof endValue !== 'number') {
-    console.warn(`Plx, ERROR: endValue is not a number (type: "${ typeof endValue }", value: "${ endValue }")`); // eslint-disable-line
+  if (typeof endValue !== "number") {
+    console.warn(
+      `Plx, ERROR: endValue is not a number (type: "${typeof endValue}", value: "${endValue}")`
+    ); // eslint-disable-line
     return null;
   }
 
   // Safety check, if "duration" is in the wrong format
-  if (typeof duration !== 'number' || duration === 0) {
-    console.warn(`Plx, ERROR: duration is zero or not a number (type: "${ typeof duration }", value: "${ duration }")`); // eslint-disable-line
+  if (typeof duration !== "number" || duration === 0) {
+    console.warn(
+      `Plx, ERROR: duration is zero or not a number (type: "${typeof duration}", value: "${duration}")`
+    ); // eslint-disable-line
     return null;
   }
 
@@ -346,7 +378,7 @@ function parallax(scrollPosition, start, duration, startValue, endValue, easing)
     max = startValue;
   }
 
-  let percentage = ((scrollPosition - start) / duration);
+  let percentage = (scrollPosition - start) / duration;
 
   if (percentage > 1) {
     percentage = 1;
@@ -357,21 +389,21 @@ function parallax(scrollPosition, start, duration, startValue, endValue, easing)
   // Apply easing
   if (easing) {
     const easingPropType = typeof easing;
-    if (easingPropType === 'object' && easing.length === 4) {
+    if (easingPropType === "object" && easing.length === 4) {
       percentage = BezierEasing(
         easing[0],
         easing[1],
         easing[2],
         easing[3]
       )(percentage);
-    } else if (easingPropType === 'string' && EASINGS[easing]) {
+    } else if (easingPropType === "string" && EASINGS[easing]) {
       percentage = BezierEasing(
         EASINGS[easing][0],
         EASINGS[easing][1],
         EASINGS[easing][2],
         EASINGS[easing][3]
       )(percentage);
-    } else if (easingPropType === 'function') {
+    } else if (easingPropType === "function") {
       percentage = easing(percentage);
     }
   }
@@ -389,42 +421,82 @@ function parallax(scrollPosition, start, duration, startValue, endValue, easing)
 }
 
 // Calculates current value for color parallax
-function colorParallax(scrollPosition, start, duration, startValue, endValue, easing) {
+function colorParallax(
+  scrollPosition,
+  start,
+  duration,
+  startValue,
+  endValue,
+  easing
+) {
   let startObject = null;
   let endObject = null;
 
-  if (startValue[0].toLowerCase() === 'r') {
+  if (startValue[0].toLowerCase() === "r") {
     startObject = rgbToObject(startValue);
   } else {
     startObject = hexToObject(startValue);
   }
 
-  if (endValue[0].toLowerCase() === 'r') {
+  if (endValue[0].toLowerCase() === "r") {
     endObject = rgbToObject(endValue);
   } else {
     endObject = hexToObject(endValue);
   }
 
   if (startObject && endObject) {
-    const r = parallax(scrollPosition, start, duration, startObject.r, endObject.r, easing);
-    const g = parallax(scrollPosition, start, duration, startObject.g, endObject.g, easing);
-    const b = parallax(scrollPosition, start, duration, startObject.b, endObject.b, easing);
-    const a = parallax(scrollPosition, start, duration, startObject.a, endObject.a, easing);
+    const r = parallax(
+      scrollPosition,
+      start,
+      duration,
+      startObject.r,
+      endObject.r,
+      easing
+    );
+    const g = parallax(
+      scrollPosition,
+      start,
+      duration,
+      startObject.g,
+      endObject.g,
+      easing
+    );
+    const b = parallax(
+      scrollPosition,
+      start,
+      duration,
+      startObject.b,
+      endObject.b,
+      easing
+    );
+    const a = parallax(
+      scrollPosition,
+      start,
+      duration,
+      startObject.a,
+      endObject.a,
+      easing
+    );
 
-    return `rgba(${ parseInt(r, 10) }, ${ parseInt(g, 10) }, ${ parseInt(b, 10) }, ${ a })`;
+    return `rgba(${parseInt(r, 10)}, ${parseInt(g, 10)}, ${parseInt(
+      b,
+      10
+    )}, ${a})`;
   }
 
   return null;
 }
 
 // Applies property parallax to the style object
-function applyProperty(scrollPosition, propertyData, startPosition, duration, style, easing) {
-  const {
-    startValue,
-    endValue,
-    property,
-    unit,
-  } = propertyData;
+function applyProperty(
+  scrollPosition,
+  propertyData,
+  startPosition,
+  duration,
+  style,
+  easing
+) {
+  const { startValue, endValue, property, unit } = propertyData;
 
   // If property is one of the color properties
   // Use it's parallax method
@@ -452,8 +524,8 @@ function applyProperty(scrollPosition, propertyData, startPosition, duration, st
     // Transforms, apply value to transform function
     newStyle.transform[property] = transformMethod(value, propertyUnit);
 
-    if (!newStyle.willChange.includes('transform')) {
-      newStyle.willChange.push('transform');
+    if (!newStyle.willChange.includes("transform")) {
+      newStyle.willChange.push("transform");
     }
   } else if (filterMethod) {
     // Get CSS unit
@@ -461,8 +533,8 @@ function applyProperty(scrollPosition, propertyData, startPosition, duration, st
     // Filters, apply value to filter function
     newStyle.filter[property] = filterMethod(value, propertyUnit);
 
-    if (!newStyle.willChange.includes('filter')) {
-      newStyle.willChange.push('filter');
+    if (!newStyle.willChange.includes("filter")) {
+      newStyle.willChange.push("filter");
     }
   } else {
     // All other properties
@@ -486,18 +558,24 @@ function getClasses(lastSegmentScrolledBy, isInSegment, parallaxData) {
   let cssClasses = null;
 
   if (lastSegmentScrolledBy === null) {
-    cssClasses = 'Plx--above';
-  } else if (lastSegmentScrolledBy === parallaxData.length - 1 && !isInSegment) {
-    cssClasses = 'Plx--below';
+    cssClasses = "Plx--above";
+  } else if (
+    lastSegmentScrolledBy === parallaxData.length - 1 &&
+    !isInSegment
+  ) {
+    cssClasses = "Plx--below";
   } else if (lastSegmentScrolledBy !== null && isInSegment) {
-    const segmentName = parallaxData[lastSegmentScrolledBy].name || lastSegmentScrolledBy;
+    const segmentName =
+      parallaxData[lastSegmentScrolledBy].name || lastSegmentScrolledBy;
 
-    cssClasses = `Plx--active Plx--in Plx--in-${ segmentName }`;
+    cssClasses = `Plx--active Plx--in Plx--in-${segmentName}`;
   } else if (lastSegmentScrolledBy !== null && !isInSegment) {
-    const segmentName = parallaxData[lastSegmentScrolledBy].name || lastSegmentScrolledBy;
-    const nextSegmentName = parallaxData[lastSegmentScrolledBy + 1].name || lastSegmentScrolledBy + 1;
+    const segmentName =
+      parallaxData[lastSegmentScrolledBy].name || lastSegmentScrolledBy;
+    const nextSegmentName =
+      parallaxData[lastSegmentScrolledBy + 1].name || lastSegmentScrolledBy + 1;
 
-    cssClasses = `Plx--active Plx--between Plx--between-${ segmentName }-and-${ nextSegmentName }`;
+    cssClasses = `Plx--active Plx--between Plx--between-${segmentName}-and-${nextSegmentName}`;
   }
 
   return cssClasses;
@@ -505,15 +583,14 @@ function getClasses(lastSegmentScrolledBy, isInSegment, parallaxData) {
 
 // Checks if class contains 'active'
 function checkIfActive(classes) {
-  return classes.indexOf('Plx--active') > -1;
+  return classes.indexOf("Plx--active") > -1;
 }
-
 
 // Omits "keysToOmit" from "object"
 function omit(object, keysToOmit) {
   const result = {};
 
-  Object.keys(object).forEach(key => {
+  Object.keys(object).forEach((key) => {
     if (keysToOmit.indexOf(key) === -1) {
       result[key] = object[key];
     }
@@ -525,17 +602,8 @@ function omit(object, keysToOmit) {
 // Main update function
 // Returns new state object based on props and scroll position
 function getNewState(scrollPosition, props, state, element) {
-  const {
-    animateWhenNotInViewport,
-    disabled,
-    freeze,
-    parallaxData,
-  } = props;
-  const {
-    showElement,
-    plxStyle,
-    plxStateClasses,
-  } = state;
+  const { animateWhenNotInViewport, disabled, freeze, parallaxData } = props;
+  const { showElement, plxStyle, plxStateClasses } = state;
 
   // Do nothing if animation is disabled, frozen
   // or if element is not rendered yet
@@ -573,7 +641,8 @@ function getNewState(scrollPosition, props, state, element) {
   const segments = [];
   let isInSegment = false;
   let lastSegmentScrolledBy = null;
-  const bodyHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+  const bodyHeight =
+    document.documentElement.scrollHeight || document.body.scrollHeight;
   const maxScroll = bodyHeight - window.innerHeight;
 
   for (let i = 0; i < parallaxData.length; i++) {
@@ -585,19 +654,25 @@ function getNewState(scrollPosition, props, state, element) {
       startOffset,
     } = parallaxData[i];
 
-    const start = parallaxData[i].start === 'self' ? element : parallaxData[i].start;
-    const end = parallaxData[i].end === 'self' ? element : parallaxData[i].end;
+    const start =
+      parallaxData[i].start === "self" ? element : parallaxData[i].start;
+    const end = parallaxData[i].end === "self" ? element : parallaxData[i].end;
 
-    const startInPx = convertPropToPixels('start', start, maxScroll, startOffset);
+    const startInPx = convertPropToPixels(
+      "start",
+      start,
+      maxScroll,
+      startOffset
+    );
     let durationInPx = null;
     let endInPx = null;
 
     // End has higher priority than duration
-    if (typeof end !== 'undefined') {
-      endInPx = convertPropToPixels('end', end, maxScroll, endOffset);
+    if (typeof end !== "undefined") {
+      endInPx = convertPropToPixels("end", end, maxScroll, endOffset);
       durationInPx = endInPx - startInPx;
     } else {
-      durationInPx = convertPropToPixels('duration', duration, maxScroll);
+      durationInPx = convertPropToPixels("duration", duration, maxScroll);
       endInPx = startInPx + durationInPx;
     }
 
@@ -616,7 +691,8 @@ function getNewState(scrollPosition, props, state, element) {
     if (scrollPosition >= startInPx && scrollPosition <= endInPx) {
       isInSegment = true;
 
-      properties.forEach(propertyData => { // eslint-disable-line no-loop-func
+      properties.forEach((propertyData) => {
+        // eslint-disable-line no-loop-func
         const { property } = propertyData;
 
         // Save which properties are applied to the active segment
@@ -647,13 +723,8 @@ function getNewState(scrollPosition, props, state, element) {
   }
 
   // These are only segments that are completly above scroll position
-  segments.forEach(data => {
-    const {
-      easing,
-      durationInPx,
-      properties,
-      startInPx,
-    } = data;
+  segments.forEach((data) => {
+    const { easing, durationInPx, properties, startInPx } = data;
 
     properties.forEach((propertyData) => {
       const { property } = propertyData;
@@ -680,25 +751,25 @@ function getNewState(scrollPosition, props, state, element) {
   // as order of CSS transforms matters
   const transformsOrdered = [];
 
-  ORDER_OF_TRANSFORMS.forEach(transformKey => {
+  ORDER_OF_TRANSFORMS.forEach((transformKey) => {
     if (newStyle.transform[transformKey]) {
       transformsOrdered.push(newStyle.transform[transformKey]);
     }
   });
 
   // Concat transforms and add webkit prefix
-  newStyle.transform = transformsOrdered.join(' ');
+  newStyle.transform = transformsOrdered.join(" ");
   newStyle.WebkitTransform = newStyle.transform;
 
   const filtersArray = [];
-  FILTER_PROPERTIES.forEach(filterKey => {
+  FILTER_PROPERTIES.forEach((filterKey) => {
     if (newStyle.filter[filterKey]) {
       filtersArray.push(newStyle.filter[filterKey]);
     }
   });
 
   // Concat filters and add webkit prefix
-  newStyle.filter = filtersArray.join(' ');
+  newStyle.filter = filtersArray.join(" ");
   newStyle.WebkitFilter = newStyle.filter;
 
   // "Stupid" check if style should be updated
@@ -707,7 +778,11 @@ function getNewState(scrollPosition, props, state, element) {
   }
 
   // Adding state class
-  const newPlxStateClasses = getClasses(lastSegmentScrolledBy, isInSegment, parallaxData);
+  const newPlxStateClasses = getClasses(
+    lastSegmentScrolledBy,
+    isInSegment,
+    parallaxData
+  );
 
   if (newPlxStateClasses !== plxStateClasses) {
     newState.plxStateClasses = newPlxStateClasses;
@@ -731,7 +806,7 @@ export default class Plx extends Component {
     this.state = {
       element: null,
       showElement: false,
-      plxStateClasses: '',
+      plxStateClasses: "",
       plxStyle: {},
     };
 
@@ -745,8 +820,8 @@ export default class Plx extends Component {
     this.scrollManager = new ScrollManager();
 
     // Add listeners
-    window.addEventListener('window-scroll', this.handleScrollChange);
-    window.addEventListener('resize', this.handleResize);
+    window.addEventListener("window-scroll", this.handleScrollChange);
+    window.addEventListener("resize", this.handleResize);
 
     this.update();
   }
@@ -761,7 +836,10 @@ export default class Plx extends Component {
     }
 
     // Callbacks
-    if ((this.plxStartEnabled || this.plxEndEnabled) && prevState.plxStateClasses !== this.state.plxStateClasses) {
+    if (
+      (this.plxStartEnabled || this.plxEndEnabled) &&
+      prevState.plxStateClasses !== this.state.plxStateClasses
+    ) {
       if (this.plxStartEnabled && !wasActive && isActive) {
         this.props.onPlxStart();
       } else if (this.plxEndEnabled && wasActive && !isActive) {
@@ -771,8 +849,8 @@ export default class Plx extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener('window-scroll', this.handleScrollChange);
-    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener("window-scroll", this.handleScrollChange);
+    window.removeEventListener("resize", this.handleResize);
 
     clearTimeout(this.resizeDebounceTimeoutID);
     this.resizeDebounceTimeoutID = null;
@@ -783,8 +861,10 @@ export default class Plx extends Component {
   }
 
   update(scrollPosition = null) {
-    const currentScrollPosition = scrollPosition === null ?
-      this.scrollManager.getScrollPosition().scrollPositionY : scrollPosition;
+    const currentScrollPosition =
+      scrollPosition === null
+        ? this.scrollManager.getScrollPosition().scrollPositionY
+        : scrollPosition;
 
     const newState = getNewState(
       currentScrollPosition,
@@ -810,18 +890,8 @@ export default class Plx extends Component {
   }
 
   render() {
-    const {
-      children,
-      className,
-      disabled,
-      style,
-      tagName,
-    } = this.props;
-    const {
-      showElement,
-      plxStyle,
-      plxStateClasses,
-    } = this.state;
+    const { children, className, disabled, style, tagName } = this.props;
+    const { showElement, plxStyle, plxStateClasses } = this.state;
 
     const Tag = tagName;
 
@@ -833,32 +903,28 @@ export default class Plx extends Component {
         ...plxStyle,
         // Hide element before until it is rendered
         // This prevents jumps if page is scrolled and then refreshed
-        visibility: showElement ? null : 'hidden',
+        visibility: showElement ? null : "hidden",
       };
     }
 
     return (
       <Tag
-        { ...omit(this.props, PROPS_TO_OMIT) }
-        className={ `Plx ${ plxStateClasses } ${ className }` }
-        style={ elementStyle }
-        ref={ el => this.element = el }
+        {...omit(this.props, PROPS_TO_OMIT)}
+        className={`Plx ${plxStateClasses} ${className}`}
+        style={elementStyle}
+        ref={(el) => (this.element = el)}
       >
-        { children }
+        {children}
       </Tag>
     );
   }
 }
 
 const propertiesItemType = PropTypes.shape({
-  startValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
-  endValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]).isRequired,
+  startValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
+  endValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
   property: PropTypes.string.isRequired,
   unit: PropTypes.string,
 });
@@ -874,10 +940,7 @@ const parallaxDataType = PropTypes.shape({
     PropTypes.number,
     PropTypes.instanceOf(SafeHTMLElement),
   ]).isRequired,
-  startOffset: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  startOffset: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   duration: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
@@ -888,10 +951,7 @@ const parallaxDataType = PropTypes.shape({
     PropTypes.number,
     PropTypes.instanceOf(SafeHTMLElement),
   ]),
-  endOffset: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  endOffset: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   properties: PropTypes.arrayOf(propertiesItemType).isRequired,
   easing: PropTypes.oneOfType([
     PropTypes.string,
@@ -901,7 +961,6 @@ const parallaxDataType = PropTypes.shape({
   name: PropTypes.string,
 });
 
-
 Plx.propTypes = {
   animateWhenNotInViewport: PropTypes.bool,
   children: PropTypes.any,
@@ -909,7 +968,9 @@ Plx.propTypes = {
   disabled: PropTypes.bool,
   freeze: PropTypes.bool,
   parallaxData: PropTypes.arrayOf(parallaxDataType),
-  style: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])),
+  style: PropTypes.objectOf(
+    PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object])
+  ),
   tagName: PropTypes.string,
   onPlxStart: PropTypes.func,
   onPlxEnd: PropTypes.func,
@@ -918,12 +979,12 @@ Plx.propTypes = {
 Plx.defaultProps = {
   animateWhenNotInViewport: false,
   children: null,
-  className: '',
+  className: "",
   disabled: false,
   freeze: false,
   parallaxData: [],
   style: {},
-  tagName: 'div',
+  tagName: "div",
   onPlxStart: null,
   onPlxEnd: null,
 };
